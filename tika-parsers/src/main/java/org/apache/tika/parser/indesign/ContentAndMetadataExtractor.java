@@ -49,7 +49,7 @@ class ContentAndMetadataExtractor {
      * @throws SAXException if the SAX events could not be processed
      * @throws TikaException if the document could not be parsed
      */
-    public void extract(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context)
+    static void extract(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context)
             throws IOException, SAXException, TikaException {
 
         // Parse the content using inner content handler

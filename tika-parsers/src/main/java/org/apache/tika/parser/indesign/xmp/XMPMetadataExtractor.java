@@ -53,7 +53,7 @@ public class XMPMetadataExtractor {
     /**
      * XMP Packet Scanner.
      */
-    private final XMPPacketScanner scanner = new XMPPacketScanner();
+    private static final XMPPacketScanner scanner = new XMPPacketScanner();
 
     /**
      * Parse the XMP Packets.
@@ -63,7 +63,7 @@ public class XMPMetadataExtractor {
      * @throws IOException on any IO error.
      * @throws TikaException on any Tika error.
      */
-    public void parse(InputStream stream, Metadata metadata) throws IOException, TikaException {
+    public static void parse(InputStream stream, Metadata metadata) throws IOException, TikaException {
         ByteArrayOutputStream xmpraw = new ByteArrayOutputStream();
         if (!scanner.parse(stream, xmpraw)) {
             return;

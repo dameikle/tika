@@ -64,16 +64,6 @@ public class IDMLParser extends AbstractParser {
     private static final String META_NAME = "META-INF/metadata.xml";
 
     /**
-     * Shared ContentAndMetadataExtractor instance.
-     */
-    private final ContentAndMetadataExtractor indesignExtractor = new ContentAndMetadataExtractor();
-
-    /**
-     * Shared XMPMetadataExtractor instance.
-     */
-    private final XMPMetadataExtractor xmpMetadataExtractor = new XMPMetadataExtractor();
-
-    /**
      * Internal page count.
      */
     private int pageCount = 0;
@@ -181,19 +171,19 @@ public class IDMLParser extends AbstractParser {
             String type = IOUtils.toString(zip, UTF_8);
             metadata.set(Metadata.CONTENT_TYPE, type);
         } else if (entry.getName().equals("META-INF/metadata.xml")) {
-            xmpMetadataExtractor.parse(zip, metadata);
+            XMPMetadataExtractor.parse(zip, metadata);
         } else if (entry.getName().contains("MasterSpreads")) {
             Metadata embeddedMeta = new Metadata();
-            indesignExtractor.extract(zip, handler, embeddedMeta, context);
+            ContentAndMetadataExtractor.extract(zip, handler, embeddedMeta, context);
             int spreadCount = Integer.parseInt(embeddedMeta.get("PageCount"));
             masterSpreadCount += spreadCount;
         } else if (entry.getName().contains("Spreads/Spread")) {
             Metadata embeddedMeta = new Metadata();
-            indesignExtractor.extract(zip, handler, embeddedMeta, context);
+            ContentAndMetadataExtractor.extract(zip, handler, embeddedMeta, context);
             int spreadCount = Integer.parseInt(embeddedMeta.get("PageCount"));
             pageCount += spreadCount;
         }  else if (entry.getName().contains("Stories")) {
-            indesignExtractor.extract(zip, handler, new Metadata(), context);
+            ContentAndMetadataExtractor.extract(zip, handler, new Metadata(), context);
         }
 
     }
