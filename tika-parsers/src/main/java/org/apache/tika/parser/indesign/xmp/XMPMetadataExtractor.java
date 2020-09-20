@@ -1,6 +1,5 @@
 package org.apache.tika.parser.indesign.xmp;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.apache.tika.metadata.DublinCore;
@@ -15,6 +14,7 @@ import org.apache.xmpbox.xml.DomXmpParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 /**
  * XMP Metadata Extractor based on Apache XmpBox.
@@ -63,10 +63,10 @@ public class XMPMetadataExtractor {
         }
         if (schemaDublinCore != null) {
             addMetadata(metadata, DublinCore.TITLE, schemaDublinCore.getTitle());
+            addMetadata(metadata, DublinCore.FORMAT, schemaDublinCore.getFormat());
             addMetadata(metadata, DublinCore.DESCRIPTION, schemaDublinCore.getDescription());
-            for (String creator : CollectionUtils.emptyIfNull(schemaDublinCore.getCreators())) {
-                addMetadata(metadata, DublinCore.CREATOR, creator);
-            }
+            addMetadata(metadata, DublinCore.CREATOR, schemaDublinCore.getCreators());
+            addMetadata(metadata, DublinCore.SUBJECT, schemaDublinCore.getSubjects());
         }
     }
 
@@ -92,6 +92,23 @@ public class XMPMetadataExtractor {
             addMetadata(metadata, XMP.CREATOR_TOOL, schemaBasic.getCreatorTool());
             addMetadata(metadata, XMP.CREATE_DATE, schemaBasic.getCreateDate().getTime());
             addMetadata(metadata, XMP.MODIFY_DATE, schemaBasic.getModifyDate().getTime());
+            addMetadata(metadata, XMP.METADATA_DATE, schemaBasic.getModifyDate().getTime());
+            addMetadata(metadata, XMP.RATING, schemaBasic.getRating());
+        }
+    }
+
+    /**
+     * Add list to the metadata map.
+     *
+     * @param metadata the metadata map to update.
+     * @param property the property to add.
+     * @param values the values to add.
+     */
+    private static void addMetadata(Metadata metadata, Property property, List<String> values) {
+        if (values != null) {
+            for (String value : values) {
+                addMetadata(metadata, property, value);
+            }
         }
     }
 
@@ -104,7 +121,26 @@ public class XMPMetadataExtractor {
      */
     private static void addMetadata(Metadata metadata, Property property, String value) {
         if (value != null) {
-            if (property.isMultiValuePermitted() || metadata.get(property) == null) {
+            if (property.isMultiValuePermitted()) {
+                metadata.add(property, value);
+            } else {
+                metadata.set(property, value);
+            }
+        }
+    }
+
+    /**
+     * Add value to the metadata map.
+     *
+     * @param metadata the metadata map to update.
+     * @param property the property to add.
+     * @param value the value to add.
+     */
+    private static void addMetadata(Metadata metadata, Property property, Integer value) {
+        if (value != null) {
+            if (property.isMultiValuePermitted()) {
+                metadata.add(property, value);
+            } else {
                 metadata.set(property, value);
             }
         }
@@ -119,9 +155,8 @@ public class XMPMetadataExtractor {
      */
     private static void addMetadata(Metadata metadata, Property property, Date value) {
         if (value != null) {
-            if (property.isMultiValuePermitted() || metadata.get(property) == null) {
-                metadata.set(property, value);
-            }
+            metadata.set(property, value);
         }
     }
+
 }
