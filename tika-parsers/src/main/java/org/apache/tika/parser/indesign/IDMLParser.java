@@ -82,11 +82,6 @@ public class IDMLParser extends AbstractParser {
     public void parse(InputStream stream, ContentHandler baseHandler, Metadata metadata, ParseContext context)
             throws IOException, SAXException, TikaException {
 
-        String title = metadata.get(Metadata.RESOURCE_NAME_KEY);
-        if (StringUtils.isNotBlank(title)) {
-            metadata.set(TikaCoreProperties.TITLE, title);
-        }
-
         ZipFile zipFile = null;
         ZipInputStream zipStream = null;
         if (stream instanceof TikaInputStream) {
@@ -124,6 +119,8 @@ public class IDMLParser extends AbstractParser {
         metadata.set("SpreadPageCount", Integer.toString(pageCount));
         metadata.set("MasterSpreadPageCount", Integer.toString(masterSpreadCount));
         metadata.set("TotalPageCount", Integer.toString(pageCount + masterSpreadCount));
+
+        xhtml.endDocument();
 
         if (handler.getEndDocumentWasCalled()) {
             handler.reallyEndDocument();
