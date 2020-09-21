@@ -61,6 +61,8 @@
         <module>tika-parser-mail-commons</module>
         <module>tika-parser-xmp-commons</module>
         <module>tika-parser-zip-commons</module>
+        <module>tika-parser-text-commons</module>
+
 
         <module>tika-parser-ocr-module</module>
         <module>tika-parser-audiovideo-module</module>
@@ -80,6 +82,7 @@
         <module>tika-parser-news-module</module>
         <module>tika-parser-crypto-module</module>
         <module>tika-parser-integration-tests</module>
+        <module>tika-parser-adobe-module</module>
     </modules>
     <build>
         <pluginManagement>

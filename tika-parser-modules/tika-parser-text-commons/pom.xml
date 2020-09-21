@@ -27,7 +27,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tika-parser-text-module</artifactId>
+    <artifactId>tika-parser-text-commons</artifactId>
 
     <dependencies>
         <dependency>
@@ -49,11 +49,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>tika-parser-text-commons</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -27,28 +27,24 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tika-parser-text-module</artifactId>
+    <artifactId>tika-parser-adobe-module</artifactId>
+
 
     <dependencies>
-        <dependency>
-            <groupId>com.googlecode.juniversalchardet</groupId>
-            <artifactId>juniversalchardet</artifactId>
-            <version>${juniversalchardet.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons.codec.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-            <version>${commons.csv.version}</version>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>xmpbox</artifactId>
+            <version>${xmpbox.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -65,7 +61,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>org.apache.tika.parser.txt</Automatic-Module-Name>
+                            <Automatic-Module-Name>org.apache.tika.parser.adobe</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -77,18 +73,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>${rat.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>src/main/java/org/apache/tika/parser/txt/Charset*.java</exclude>
-                        <exclude>src/test/resources/test-documents/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
 </project>

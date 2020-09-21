@@ -163,6 +163,7 @@ public class PackageParser extends AbstractParser {
                 "application/vnd.sun.xml.draw",
                 "application/vnd.sun.xml.impress",
                 "application/vnd.openofficeorg.autotext",
+                "application/vnd.adobe.indesign-idml-package",
 
 
                 "application/x-gtar" //specialization of tar

@@ -283,6 +283,13 @@
   </mime-type>
 
   <mime-type type="application/im-iscomposing+xml"/>
+
+  <mime-type type="application/vnd.adobe.indesign-idml-package">
+    <sub-class-of type="application/zip"/>
+    <_comment>IDML</_comment>
+    <glob pattern="*.idml"/>
+  </mime-type>
+
   <mime-type type="application/index"/>
   <mime-type type="application/index.cmd"/>
   <mime-type type="application/index.obj"/>
@@ -501,6 +508,7 @@
   <mime-type type="application/mediaservercontrol+xml">
     <glob pattern="*.mscml"/>
   </mime-type>
+
   <mime-type type="application/mikey"/>
   <mime-type type="application/moss-keys"/>
   <mime-type type="application/moss-signature"/>

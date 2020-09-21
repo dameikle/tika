@@ -347,6 +347,7 @@
     <uima.version>3.1.0</uima.version>
     <vorbis.version>0.8</vorbis.version>
     <xerces.version>2.12.0</xerces.version>
+    <xmpbox.version>2.0.21</xmpbox.version>
     <xmpcore.version>6.1.10</xmpcore.version>
     <zstd.version>1.4.5-6</zstd.version>
   </properties>
