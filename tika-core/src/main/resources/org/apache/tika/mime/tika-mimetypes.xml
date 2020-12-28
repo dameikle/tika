@@ -36,7 +36,7 @@
    * For logic too complex to be expressed in a magic match, do the best
      you can here, then provide a Custom Detector for the rest
 -->
-<mime-info>
+<mime-info xmlns:tika="https://tika.apache.org/">
 
   <mime-type type="application/activemessage"/>
   <mime-type type="application/andrew-inset">
@@ -59,7 +59,6 @@
 	  <glob pattern="*.iso19139"/>
 	  <sub-class-of type="application/xml"/>
    </mime-type>
-
 
   <mime-type type="application/atom+xml">
     <root-XML localName="feed" namespaceURI="http://purl.org/atom/ns#"/>
@@ -280,6 +279,13 @@
   </mime-type>
 
   <mime-type type="application/im-iscomposing+xml"/>
+
+  <mime-type type="application/vnd.adobe.indesign-idml-package">
+    <sub-class-of type="application/zip"/>
+    <_comment>IDML</_comment>
+    <glob pattern="*.idml"/>
+  </mime-type>
+
   <mime-type type="application/index"/>
   <mime-type type="application/index.cmd"/>
   <mime-type type="application/index.obj"/>
@@ -473,6 +479,7 @@
   <mime-type type="application/mediaservercontrol+xml">
     <glob pattern="*.mscml"/>
   </mime-type>
+
   <mime-type type="application/mikey"/>
   <mime-type type="application/moss-keys"/>
   <mime-type type="application/moss-signature"/>
@@ -4527,10 +4534,78 @@
     <sub-class-of type="application/x-bplist"/>
     <glob pattern="*.webarchive"/>
   </mime-type>
-  <mime-type type="application/x-x509-ca-cert">
-    <glob pattern="*.der"/>
+
+  <mime-type type="application/x-x509-cert">
+    <alias type="application/x-x509-ca-cert"/>
+    <alias type="application/x-x509-user-cert"/>
     <glob pattern="*.crt"/>
   </mime-type>
+  <mime-type type="application/x-x509-cert;format=pem">
+    <sub-class-of type="application/x-x509-cert"/>
+    <glob pattern="*.pem"/>
+    <magic priority="50">
+      <match value="-----BEGIN CERTIFICATE-----" type="string" offset="0"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-x509-cert;format=der">
+    <sub-class-of type="application/x-x509-cert"/>
+    <glob pattern="*.der"/>
+    <magic priority="50">
+      <match value="0x3080" type="string"
+              mask="0xFFF8" offset="0">
+         <!-- SHA with RSA Encryption -->
+         <match value="0x300d06092a864886f70d01010b0500" type="string"
+                 mask="0xFFFFFFFFFFFFFFFFFFFFFFFF00FFFF" offset="10:50" />
+         <!-- SHA with DSA Encryption -->
+         <match value="0x300b0609608648016503040301" type="string"
+                 mask="0xFFFFFFFFFFFFFFFFFFFFFFFF00" offset="10:50" />
+         <!-- SHA with ECDSA Encryption -->
+         <match value="0x300a06082a8648ce3d040301" type="string"
+                 mask="0xFFFFFFFFFFFFFFFFFFFFFF00" offset="10:50" />
+      </match>
+    </magic>
+  </mime-type>
+
+  <mime-type type="application/x-x509-key">
+  </mime-type>
+  <mime-type type="application/x-x509-key;format=pem">
+    <sub-class-of type="application/x-x509-key"/>
+    <magic priority="50">
+      <match value="-----BEGIN PRIVATE KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN PUBLIC KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN RSA KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN RSA PRIVATE KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN DSA KEY-----" type="string" offset="0"/>
+      <match value="-----BEGIN DSA PRIVATE KEY-----" type="string" offset="0"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-x509-key;format=der">
+    <sub-class-of type="application/x-x509-key"/>
+    <!-- These are just a bunch of magic integers as defined by the key format... -->
+    <!-- Always seem to have a version integer as their first entry, -->
+    <!--  normally 00, 01 or 02, check for that -->
+    <magic priority="40">
+      <match value="0x3081FF020100" type="string"
+              mask="0xFFFF00FFFFFC" offset="0"/>
+      <match value="0x3082FFFF020100" type="string"
+              mask="0xFFFF0000FFFFFC" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <mime-type type="application/x-x509-dsa-parameters">
+    <magic priority="50">
+      <!-- PEM encoded only -->
+      <match value="-----BEGIN DSA PARAMETERS-----" type="string" offset="0"/>
+    </magic>
+  </mime-type>
+  <mime-type type="application/x-x509-ec-parameters">
+    <magic priority="50">
+      <!-- PEM encoded only -->
+      <match value="-----BEGIN EC PARAMETERS-----" type="string" offset="0"/>
+    </magic>
+  </mime-type>
+
   <mime-type type="application/x-xfig">
     <glob pattern="*.fig"/>
   </mime-type>
@@ -5643,7 +5718,17 @@
     </magic>
     <glob pattern="*.webp"/>
   </mime-type>
-
+  <mime-type type="image/avif">
+    <!-- According to https://github.com/libvips/libvips/pull/1657
+      older avif used to use the the heif 'ftypmif1' as well -->
+    <_comment>AV1 Image File</_comment>
+    <acronym>AVIF</acronym>
+    <tika:link>https://en.wikipedia.org/wiki/AV1#AV1_Image_File_Format_(AVIF)</tika:link>
+    <magic priority="60">
+      <match value="ftypavif" type="string" offset="4"/>
+    </magic>
+    <glob pattern="*.avif"/>
+  </mime-type>
   <mime-type type="image/heic">
     <tika:link>https://en.wikipedia.org/wiki/High_Efficiency_Image_File_Format</tika:link>
     <magic priority="50">

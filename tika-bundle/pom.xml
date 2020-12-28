@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-parent</artifactId>
-    <version>1.25-SNAPSHOT</version>
+    <version>1.26-SNAPSHOT</version>
     <relativePath>../tika-parent/pom.xml</relativePath>
   </parent>
 
@@ -68,6 +68,16 @@
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit4</artifactId>
       <version>${pax.exam.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.ops4j.base</groupId>
+          <artifactId>ops4j-base-store</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.ops4j.base</groupId>
+          <artifactId>ops4j-base-lang</artifactId>
+        </exclusion>
+      </exclusions>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -89,13 +99,13 @@
     <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-util-property</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.base</groupId>
       <artifactId>ops4j-base-lang</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -128,6 +138,12 @@
       <version>${osgi.core.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.cm</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- use non-log4j slf4j backend to prevent main classloader from loading log4j classes -->
     <dependency>
@@ -148,14 +164,6 @@
 	    <version>1.2.16</version>
 	    <scope>test</scope>
 	</dependency>
-	<dependency>
-    <groupId>jakarta.activation</groupId>
-	  <artifactId>jakarta.activation-api</artifactId>
-	  <version>1.2.1</version>
-	  <scope>test</scope>
-	</dependency>
-
-    
   </dependencies>
 
   <build>
@@ -187,6 +195,7 @@
               pdfbox-tools|
               pdfbox-debugger|
               pdfbox-preflight|
+              xmpbox|
               fontbox|
               jempbox|
               bcmail-jdk15on|
@@ -366,6 +375,7 @@
               org.apache.tools.ant;resolution:=optional,
               org.apache.tools.ant.taskdefs;resolution:=optional,
               org.apache.tools.ant.types;resolution:=optional,
+              org.apache.xerces.impl;resolution:=optional,
               org.apache.xerces.parsers;resolution:=optional,
               org.apache.xerces.util;resolution:=optional,
               org.apache.xerces.xni;resolution:=optional,
@@ -421,6 +431,7 @@
               org.xmlpull.v1;resolution:=optional,
               com.microsoft.schemas.office.powerpoint;resolution:=optional,
               com.microsoft.schemas.office.word;resolution:=optional,
+              sun.java2d.cmm.kcms;resolution:=optional,
               sun.misc;resolution:=optional,
               ucar.units;resolution:=optional,
               ucar.httpservices;resolution:=optional,

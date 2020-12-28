@@ -26,17 +26,13 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.config.Field;
-import org.apache.tika.detect.XmlRootExtractor;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.extractor.EmbeddedDocumentUtil;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -103,6 +99,8 @@ public class OpenDocumentParser extends AbstractParser {
 
     private static final String META_NAME = "meta.xml";
 
+    private EmbeddedDocumentUtil embeddedDocumentUtil;
+
     private Parser meta = new OpenDocumentMetaParser();
 
     private Parser content = new OpenDocumentContentParser();
@@ -133,6 +131,8 @@ public class OpenDocumentParser extends AbstractParser {
             InputStream stream, ContentHandler baseHandler,
             Metadata metadata, ParseContext context)
             throws IOException, SAXException, TikaException {
+
+        embeddedDocumentUtil = new EmbeddedDocumentUtil(context);
 
         // Open the Zip stream
         // Use a File if we can, and an already open zip is even better
@@ -247,21 +247,28 @@ public class OpenDocumentParser extends AbstractParser {
             if (embeddedName.contains("Thumbnails/") ||
                     embeddedName.contains("Pictures/")) {
 
-                EmbeddedDocumentExtractor embeddedDocumentExtractor =
-                        EmbeddedDocumentUtil.getEmbeddedDocumentExtractor(context);
                 Metadata embeddedMetadata = new Metadata();
-                embeddedMetadata.set(TikaCoreProperties.ORIGINAL_RESOURCE_NAME, entry.getName());
+                TikaInputStream stream = TikaInputStream.get(zip);
+
+                embeddedMetadata.set(Metadata.RESOURCE_NAME_KEY, entry.getName());
                 if (embeddedName.startsWith("Thumbnails/")) {
                     embeddedMetadata.set(TikaCoreProperties.EMBEDDED_RESOURCE_TYPE,
                             TikaCoreProperties.EmbeddedResourceType.THUMBNAIL.toString());
                 }
+
                 if (embeddedName.contains("Pictures/")) {
                     embeddedMetadata.set(TikaMetadataKeys.EMBEDDED_RESOURCE_TYPE,
                             TikaCoreProperties.EmbeddedResourceType.INLINE.toString());
+
+                    MediaType embeddedMimeType = embeddedDocumentUtil.getDetector().detect(stream, embeddedMetadata);
+                    if (embeddedMimeType != null) {
+                        embeddedMetadata.set(Metadata.CONTENT_TYPE, embeddedMimeType.toString());
+                    }
+                    stream.reset();
                 }
 
-                if (embeddedDocumentExtractor.shouldParseEmbedded(embeddedMetadata)) {
-                    embeddedDocumentExtractor.parseEmbedded(zip,
+                if (embeddedDocumentUtil.shouldParseEmbedded(embeddedMetadata)) {
+                    embeddedDocumentUtil.parseEmbedded(stream,
                             new EmbeddedContentHandler(handler), embeddedMetadata, false);
                 }
             } else if (extractMacros && embeddedName.contains("Basic/")) {

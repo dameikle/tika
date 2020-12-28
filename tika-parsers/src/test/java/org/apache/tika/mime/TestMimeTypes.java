@@ -430,6 +430,14 @@ public class TestMimeTypes {
     }
 
     @Test
+    public void testAVIFDetection() throws Exception {
+        // The test file is an avif header fragment only, not a complete image.
+        assertType("image/avif", "testAVIF.avif");
+        assertTypeByData("image/avif", "testAVIF.avif");
+        assertTypeByName("image/avif", "testAVIF.avif");
+    }
+
+    @Test
     public void testHeifDetection() throws Exception {
         // HEIF image using the HEVC Codec == HEIC
         //  created using https://compare.rokka.io/_compare on testJPEG_GEO.jpg
@@ -1132,6 +1140,24 @@ public class TestMimeTypes {
         assertTypeByData("application/pkcs7-signature", "testPKCS17Sig-v2.xml.p7m");
         assertTypeByData("application/pkcs7-signature", "testPKCS17Sig-v3.xml.p7m");
         assertTypeByData("application/pkcs7-signature", "testPKCS17Sig-v4.xml.p7m");
+    }
+
+    @Test
+    public void testCertificatesKeys() throws Exception {
+        assertType("application/x-x509-cert; format=pem", "testCERT.pem");
+        assertType("application/x-x509-cert; format=der", "testCERT.der");
+        assertTypeByData("application/x-x509-cert; format=pem", "testCERT.pem");
+        assertTypeByData("application/x-x509-cert; format=der", "testCERT.der");
+        // Keys need the data to identify, name isn't enough
+        assertTypeByData("application/x-x509-key; format=pem", "testECKEY.pem");
+        assertTypeByData("application/x-x509-key; format=der", "testECKEY.der");
+        assertTypeByData("application/x-x509-key; format=pem", "testRSAKEY.pem");
+        assertTypeByData("application/x-x509-key; format=der", "testRSAKEY.der");
+        assertTypeByData("application/x-x509-key; format=pem", "testDSAKEY.pem");
+        assertTypeByData("application/x-x509-key; format=der", "testDSAKEY.der");
+        // Parameters only have PEM form, always need data
+        assertTypeByData("application/x-x509-dsa-parameters", "testDSAPARAMS.pem");
+        assertTypeByData("application/x-x509-ec-parameters", "testECPARAMS.pem");
     }
 
     @Test

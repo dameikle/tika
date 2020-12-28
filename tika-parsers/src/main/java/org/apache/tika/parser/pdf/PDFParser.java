@@ -39,6 +39,10 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.apache.pdfbox.pdmodel.fixup.AbstractFixup;
+import org.apache.pdfbox.pdmodel.fixup.PDDocumentFixup;
+import org.apache.pdfbox.pdmodel.fixup.processor.AcroFormDefaultsProcessor;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.tika.config.Field;
 import org.apache.tika.config.Initializable;
 import org.apache.tika.config.InitializableProblemHandler;
@@ -50,8 +54,7 @@ import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.AccessPermissions;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.Office;
-import org.apache.tika.metadata.OfficeOpenXMLCore;
+
 import org.apache.tika.metadata.PDF;
 import org.apache.tika.metadata.PagedText;
 import org.apache.tika.metadata.Property;
@@ -265,9 +268,14 @@ public class PDFParser extends AbstractParser implements Initializable {
         if (document.getDocumentCatalog().getLanguage() != null) {
             metadata.set(TikaCoreProperties.LANGUAGE, document.getDocumentCatalog().getLanguage());
         }
-        if (document.getDocumentCatalog().getAcroForm() != null &&
-            document.getDocumentCatalog().getAcroForm().getFields() != null &&
-            document.getDocumentCatalog().getAcroForm().getFields().size() > 0) {
+
+        // TIKA-3246: Do this for the first call of getAcroForm(),
+        // subsequent calls should use the same fixup or null to avoid a default fixup.
+        // Do not call without parameters (would mean default fixup which is slower because
+        // it creates annotation appearances)
+        PDDocumentFixup fixup = new TikaAcroFormFixup(document);
+        PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm(fixup);
+        if (acroForm != null && acroForm.getFields() != null && !acroForm.getFields().isEmpty()) {
             metadata.set(PDF.HAS_ACROFORM_FIELDS, "true");
         }
         PDMetadataExtractor.extract(document.getDocumentCatalog().getMetadata(), metadata, context);
@@ -362,8 +370,8 @@ public class PDFParser extends AbstractParser implements Initializable {
 
     private boolean hasXFA(PDDocument pdDocument) {
         return pdDocument.getDocumentCatalog() != null &&
-                pdDocument.getDocumentCatalog().getAcroForm() != null &&
-                pdDocument.getDocumentCatalog().getAcroForm().hasXFA();
+                pdDocument.getDocumentCatalog().getAcroForm(null) != null &&
+                pdDocument.getDocumentCatalog().getAcroForm(null).hasXFA();
     }
 
     private boolean shouldHandleXFAOnly(boolean hasXFA, PDFParserConfig config) {
@@ -377,7 +385,7 @@ public class PDFParser extends AbstractParser implements Initializable {
         XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
         xhtml.startDocument();
         try (InputStream is = new ByteArrayInputStream(
-                pdDocument.getDocumentCatalog().getAcroForm().getXFA().getBytes())) {
+                pdDocument.getDocumentCatalog().getAcroForm(null).getXFA().getBytes())) {
             ex.extract(is, xhtml, metadata, context);
         } catch (XMLStreamException e) {
             throw new TikaException("XML error in XFA", e);
@@ -462,7 +470,7 @@ public class PDFParser extends AbstractParser implements Initializable {
      * If true, sort text tokens by their x/y position
      * before extracting text.  This may be necessary for
      * some PDFs (if the text tokens are not rendered "in
-     * order"), while for other PDFs it can produce the
+     * order"), while for othe6 -- Add FileProfilerr PDFs it can produce the
      * wrong result (for example if there are 2 columns,
      * the text will be interleaved).  Default is false.
      */
@@ -600,6 +608,11 @@ public class PDFParser extends AbstractParser implements Initializable {
     }
 
     @Field
+    public void setDropThreshold(float dropThreshold) {
+        defaultConfig.setDropThreshold(dropThreshold);
+    }
+
+    @Field
     public void setMaxMainMemoryBytes(long maxMainMemoryBytes) {
         defaultConfig.setMaxMainMemoryBytes(maxMainMemoryBytes);
     }
@@ -651,6 +664,22 @@ public class PDFParser extends AbstractParser implements Initializable {
                         sb.toString());
             }
             HAS_WARNED = true;
+        }
+    }
+
+    /**
+     * Copied from AcroformDefaultFixup minus generation of appearances and handling of orphan
+     * widgets, which we don't need.
+     */
+    class TikaAcroFormFixup extends AbstractFixup
+    {
+        TikaAcroFormFixup(PDDocument document) {
+            super(document);
+        }
+
+        @Override
+        public void apply() {
+            new AcroFormDefaultsProcessor(document).process();
         }
     }
 }
