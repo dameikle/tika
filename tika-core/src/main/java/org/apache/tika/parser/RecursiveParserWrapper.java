@@ -227,17 +227,15 @@ public class RecursiveParserWrapper extends ParserDecorator {
         long started = System.currentTimeMillis();
         parserState.recursiveParserWrapperHandler.startDocument();
         TemporaryResources tmp = new TemporaryResources();
-        int writeLimit = -1;
-        //TODO -- rely on a new interface WriteLimiting...?
-        //It'd be better not to tie this to a specific class
-        if (recursiveParserWrapperHandler instanceof BasicContentHandlerFactory) {
-            writeLimit =
-                    ((BasicContentHandlerFactory)recursiveParserWrapperHandler).getWriteLimit();
+        int totalWriteLimit = -1;
+        if (recursiveParserWrapperHandler instanceof AbstractRecursiveParserWrapperHandler) {
+            totalWriteLimit =
+                    ((AbstractRecursiveParserWrapperHandler)recursiveParserWrapperHandler).getTotalWriteLimit();
         }
         try {
             TikaInputStream tis = TikaInputStream.get(stream, tmp);
             RecursivelySecureContentHandler secureContentHandler =
-                        new RecursivelySecureContentHandler(localHandler, tis, writeLimit);
+                        new RecursivelySecureContentHandler(localHandler, tis, totalWriteLimit);
             context.set(RecursivelySecureContentHandler.class, secureContentHandler);
             getWrappedParser().parse(tis, secureContentHandler, metadata, context);
         } catch (SAXException e) {
@@ -488,35 +486,45 @@ public class RecursiveParserWrapper extends ParserDecorator {
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             if (totalWriteLimit < 0) {
-                advance(length);
                 super.characters(ch, start, length);
                 return;
             }
             int availableLength = Math.min(totalWriteLimit - totalChars, length);
-            advance(availableLength);
             super.characters(ch, start, availableLength);
+            totalChars += availableLength;
             if (availableLength < length) {
-                throw new WriteLimitReached();
+                throw new WriteLimitReached(totalWriteLimit);
             }
         }
 
         @Override
         public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
             if (totalWriteLimit < 0) {
-                advance(length);
                 super.ignorableWhitespace(ch, start, length);
                 return;
             }
             int availableLength = Math.min(totalWriteLimit - totalChars, length);
-            advance(availableLength);
             super.ignorableWhitespace(ch, start, availableLength);
+
             if (availableLength < length) {
-                throw new WriteLimitReached();
+                throw new WriteLimitReached(totalWriteLimit);
             }
+            totalChars += availableLength;
         }
     }
 
     private static class WriteLimitReached extends SAXException {
-
+        final int writeLimit;
+        WriteLimitReached(int writeLimit) {
+            this.writeLimit = writeLimit;
+        }
+        @Override
+        public String getMessage() {
+            return "Your document contained more than " + writeLimit
+                    + " characters, and so your requested limit has been"
+                    + " reached. To receive the full text of the document,"
+                    + " increase your limit. (Text up to the limit is"
+                    + " however available).";
+        }
     }
 }
