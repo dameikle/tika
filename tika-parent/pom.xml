@@ -319,7 +319,7 @@
     <ddplist.version>1.25</ddplist.version>
     <dl4j.version>1.0.0-M2</dl4j.version>
     <!-- fakeload versions &gt; 0.4.0 require java > 8 -->
-    <fakeload.version>0.4.0</fakeload.version>
+    <fakeload.version>0.7.0</fakeload.version>
     <geoapi.version>3.0.1</geoapi.version>
     <guava.version>31.1-jre</guava.version>
     <httpcomponents.version>4.5.13</httpcomponents.version>
